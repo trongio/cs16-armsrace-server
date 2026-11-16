@@ -1,0 +1,5 @@
+.env
+data/
+dl/
+overlay/addons/amxmodx/logs/*
+!overlay/addons/amxmodx/logs/.gitkeep

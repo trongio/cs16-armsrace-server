@@ -1,0 +1,10 @@
+fy_pool_day
+fy_snow
+fy_iceworld
+fy_buzzkill
+fy_sand
+aim_map
+aim_ak-colt
+aim_headshot
+awp_india
+awp_india2

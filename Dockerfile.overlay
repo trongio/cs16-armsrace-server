@@ -1,0 +1,2 @@
+FROM cs16-hlds
+COPY overlay/ /hlds/cstrike/
