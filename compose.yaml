@@ -15,7 +15,25 @@ services:
       - ./cfg/servertools.ini:/hlds/cstrike/addons/amxmodx/configs/servertools.ini:ro
       - ./data:/hlds/cstrike/addons/amxmodx/data/sqlite3
       - ./yapb-graph:/hlds/cstrike/addons/yapb/data/graph
+      - ./runtime/models:/hlds/cstrike/models/st:ro
     command: ["-insecure", "+map", "fy_snow", "+maxplayers", "16", "+sv_lan", "0", "+exec", "server.cfg"]
+
+  hltv:
+    image: cs16-armsrace
+    pull_policy: never
+    container_name: cs16-hltv
+    network_mode: host
+    restart: "no"
+    depends_on: [cs16]
+    stdin_open: true
+    tty: true
+    environment:
+      - SV_PASSWORD=${SV_PASSWORD}
+      - PORT=27015
+    entrypoint: ["/bin/bash", "/hltv.sh"]
+    volumes:
+      - ./tools/hltv.sh:/hltv.sh:ro
+      - ./runtime/demos:/demos
 
   fastdl:
     image: nginx:1.27-alpine
@@ -27,6 +45,7 @@ services:
       - ./overlay/maps:/srv/cstrike/maps:ro
       - ./overlay/sound:/srv/cstrike/sound:ro
       - ./overlay/gfx:/srv/cstrike/gfx:ro
+      - ./runtime/models:/srv/cstrike/models/st:ro
       - ./overlay/de_vegas.wad:/srv/cstrike/de_vegas.wad:ro
 
   panel:
@@ -42,5 +61,6 @@ services:
       - PANEL_PORT=8016
     volumes:
       - ./data:/data:ro
+      - ./runtime:/runtime
       - ./cfg/servertools.ini:/cfg/servertools.ini:ro
       - /var/run/docker.sock:/var/run/docker.sock

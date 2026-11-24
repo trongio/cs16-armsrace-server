@@ -327,6 +327,66 @@ tbody tr:hover { background: rgba(255,255,255,.025); }
   .map-hero { min-height: 280px; padding: 20px; }
   .maps { grid-template-columns: repeat(2, 1fr); }
 }
+/* ---------- server room ---------- */
+.room { display: grid; grid-template-columns: 400px 1fr; gap: 20px; align-items: start; }
+.room .col { gap: 16px; }
+.health { padding: 18px; }
+.h-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.h-badge { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; flex: none; background: var(--panel-2); border: 1px solid var(--line-2); }
+.h-badge svg { width: 22px; height: 22px; }
+.h-badge.ok { color: var(--good); border-color: rgba(61,220,132,.45); background: rgba(61,220,132,.1); }
+.h-badge.bad { color: var(--bad); border-color: rgba(255,77,94,.5); background: rgba(255,77,94,.1); }
+.h-badge.idle { color: var(--muted); }
+.h-badge.busy { color: var(--accent); border-color: rgba(255,159,28,.5); background: rgba(255,159,28,.1); }
+.h-badge.busy svg { animation: spin 1.2s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.h-title b { display: block; font-family: var(--head); font-size: 20px; text-transform: uppercase; letter-spacing: .04em; }
+.h-title span { color: var(--dim); font-size: 12px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 13px; margin-bottom: 14px; }
+.kv dt { color: var(--dim); font-weight: 600; }
+.kv dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.problems { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,77,94,.4); background: rgba(255,77,94,.07); font-size: 12.5px; }
+.problems div + div { margin-top: 4px; }
+.notice { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,159,28,.45); background: rgba(255,159,28,.08); font-size: 12.5px; }
+.plugins { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.plug { font-size: 11.5px; font-weight: 600; padding: 4px 8px; border-radius: 7px; background: var(--panel-2); border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 6px; }
+.plug::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--good); }
+.plug.off::before { background: var(--bad); }
+.plug small { color: var(--dim); font-weight: 500; }
+.h-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.h-actions .btn { justify-content: center; }
+.h-actions .wide { grid-column: span 2; }
+.console { display: flex; flex-direction: column; height: 640px; overflow: hidden; }
+.con-head { display: flex; align-items: center; gap: 10px; padding: 12px 12px 10px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.con-head .tabs { padding: 3px; flex: none; }
+.con-head .tab { padding: 6px 12px; font-size: 12px; flex: none; }
+.con-body { flex: 1; overflow-y: auto; padding: 10px 14px; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; color: #b8c0cc; overscroll-behavior: contain; }
+.ln { white-space: pre-wrap; word-break: break-word; }
+.ln .t { color: var(--dim); margin-right: 8px; }
+.ln.error { color: #ff8a95; } .ln.warn { color: #ffcf7a; } .ln.css { color: #9fd0ff; } .ln.cmd { color: var(--accent-2); } .ln.out { color: var(--text); }
+.ln.chat { color: var(--text); font-family: var(--body); font-size: 13px; padding: 2px 0; }
+.ln.chat .who { font-weight: 700; margin-right: 6px; }
+.ln.chat .who.t2 { color: var(--t); } .ln.chat .who.t3 { color: var(--ct); }
+.ln.chat .scope { font-size: 10px; font-weight: 700; color: var(--dim); letter-spacing: .08em; margin-right: 6px; }
+.con-in { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
+.con-in input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--panel-2); color: var(--text); font: 500 13px ui-monospace, SFMono-Regular, Menlo, monospace; outline: none; }
+.con-in input:focus { border-color: rgba(255,159,28,.6); }
+.con-in select { padding: 0 8px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--panel-2); color: var(--text); font: 600 12px var(--body); }
+.demos { padding: 16px; }
+.demo { display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.demo:first-of-type { border-top: 0; }
+.demo .th { width: 56px; height: 36px; border-radius: 7px; background: #1a1f27 center/cover; }
+.demo .di { min-width: 0; }
+.demo .di b { display: block; font-family: var(--head); text-transform: uppercase; letter-spacing: .03em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.demo .di span { color: var(--dim); font-size: 12px; }
+.demo .da { display: flex; gap: 6px; }
+.rec { color: var(--bad); font-weight: 700; font-size: 11px; letter-spacing: .08em; }
+.rec::before { content: "● "; animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: .3; } }
+.offline-banner .btn { margin-left: 12px; vertical-align: middle; }
+@media (max-width: 1080px) { .room { grid-template-columns: 1fr; } .console { height: 520px; } }
+@media (max-width: 640px) { .console { height: 460px; } .con-head { padding: 10px; } }
+.gun .swatch, .opt .swatch { display: block; width: 100%; aspect-ratio: 8/3; border-radius: 8px; margin: 8px 0; border: 1px solid var(--line-2); }
 </style>
 <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -343,12 +403,12 @@ tbody tr:hover { background: rgba(255,255,255,.025); }
     <div class="pill click" id="pw-pill" title="Click to copy the server password"><i data-lucide="key-round"></i><span id="pw">…</span><i data-lucide="copy" class="hide-sm" style="opacity:.6"></i></div>
     <button class="btn" id="copy-join" title="Copy an invite for friends"><i data-lucide="send"></i><span class="hide-sm">Copy invite</span></button>
     <button class="btn icon-btn" id="qr-btn" title="Open on your phone"><i data-lucide="qr-code"></i></button>
-    <button class="btn icon-btn danger" id="power-btn" title="Shut down the server and this dashboard"><i data-lucide="power"></i></button>
+    <button class="btn icon-btn danger" id="power-btn" title="Shut down the server AND this dashboard"><i data-lucide="power"></i></button>
   </div>
 </header>
 
 <div class="wrap" id="app">
-  <div class="offline-banner"><b>Server is offline.</b> <span style="color:var(--muted)">Start it with the "CS 1.6 Server" desktop shortcut. This page reconnects by itself.</span></div>
+  <div class="offline-banner"><b>Server is offline.</b> <span style="color:var(--muted)">Start it here or with the "CS 1.6 Server" desktop shortcut. This page reconnects by itself.</span><button class="btn primary" data-srv="start"><i data-lucide="play"></i>Start server</button></div>
 
   <div class="hero">
     <div class="card map-hero">
@@ -410,6 +470,39 @@ tbody tr:hover { background: rgba(255,255,255,.025); }
   </section>
 
 
+  <section id="room">
+    <div class="sec-h"><h1>Server <em>room</em></h1><span style="color:var(--dim);font-size:12px">Health, live console and match recordings</span></div>
+    <div class="room">
+      <div class="col">
+        <div class="card health" id="health"><div class="empty">Checking…</div></div>
+        <div class="card demos"><div class="sb-head" style="margin-bottom:8px"><h2>Match demos</h2><span id="demo-n" style="color:var(--dim);font-size:12px"></span></div><div id="demo-list"></div></div>
+      </div>
+      <div class="card console">
+        <div class="con-head">
+          <h2>Console</h2>
+          <div class="spacer"></div>
+          <div class="tabs" id="con-tabs">
+            <button class="tab on" data-con="all">All</button><button class="tab" data-con="chat">Chat</button><button class="tab" data-con="error">Errors</button>
+          </div>
+        </div>
+        <div class="con-body" id="con-body"></div>
+        <form class="con-in" id="con-form" autocomplete="off">
+          <select id="con-mode" title="Send as"><option value="say">Chat</option><option value="rcon">RCON</option></select>
+          <input id="con-input" placeholder="Message everyone in game…" maxlength="240">
+          <button class="btn primary icon-btn" title="Send"><i data-lucide="send-horizontal"></i></button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="armory">
+    <div class="sec-h"><h1>The <em>armory</em></h1><span style="color:var(--dim);font-size:12px">Finishes apply live, even mid-match. Only the owner sees them.</span></div>
+    <div class="ar-top">
+      <div class="who" id="ar-who"></div>
+      <div class="presets" id="ar-presets"></div>
+    </div>
+    <div id="ar-body"><div class="empty">Loading the armory…</div></div>
+  </section>
   <section>
     <div class="sec-h"><h1>Hall of <em>fame</em></h1><span style="color:var(--dim);font-size:12px">All-time, every match on this server</span></div>
     <div class="kpis">
@@ -458,13 +551,21 @@ tbody tr:hover { background: rgba(255,255,255,.025); }
     <div class="row" style="justify-content:center;margin-top:18px"><button class="btn" id="qr-close">Close</button></div>
   </div>
 </div>
+<div class="modal picker" id="picker">
+  <div class="card box">
+    <div class="pk-head">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 id="pk-title"></h3><button class="btn icon-btn" id="pk-close"><i data-lucide="x"></i></button></div>
+    </div>
+    <div class="pk-grid" id="pk-grid"></div>
+  </div>
+</div>
 <div class="toasts" id="toasts"></div>
 
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const img = m => `/static/maps/${encodeURIComponent(m)}.jpg`;
-const MODE_LABEL = { ar: 'Arms Race', dm: 'Deathmatch', casual: 'Casual', comp: 'Competitive' };
+const MODE_LABEL = { ar: 'Arms Race', dm: 'Deathmatch', casual: 'Casual', comp: 'Competitive', retakes: 'Retakes', rush: 'Rush' };
 const WEAPON = { ak47:'AK-47', m4a1:'M4A1', awp:'AWP', deagle:'Desert Eagle', usp:'USP', glock18:'Glock-18', p228:'P228',
   fiveseven:'Five-SeveN', elite:'Dual Elites', famas:'FAMAS', galil:'Galil', aug:'AUG', sg552:'SG 552', scout:'Scout', sg550:'SG 550',
   g3sg1:'G3SG1', mac10:'MAC-10', tmp:'TMP', mp5navy:'MP5', ump45:'UMP-45', p90:'P90', m3:'M3', xm1014:'XM1014', m249:'M249',
@@ -477,6 +578,7 @@ const TOGGLES = [
   ['speed', 'zap', 'Speed boost', '40% faster movement'],
   ['adaptive', 'brain', 'Adaptive bots', 'Harder when you win'],
   ['announcer', 'megaphone', 'Kill announcer', 'Multi kills, streaks, first blood'],
+  ['takeover', 'user-round-cog', 'Bot takeover', 'Dead? Press E on a bot teammate (round modes)'],
 ];
 
 let S = null, tab = null, pendingMap = null, botsDragging = false;
@@ -527,7 +629,7 @@ function renderState() {
   const chips = [`<span class="chip">${humans.length} human${humans.length === 1 ? '' : 's'} · ${S.players.length - humans.length} bots</span>`];
   if (S.next) chips.push(`<span class="chip hot">Next: ${esc(MODE_LABEL[S.next.mode] || S.next.mode)} · ${esc(S.next.map)}</span>`);
   if (S.vote === 'ModeVote' || S.vote === 'MapVote') chips.push(`<span class="chip hot">🗳 Vote in progress</span>`);
-  for (const [k, ic, label] of TOGGLES) if (S.modifiers[k] && k !== 'announcer' && k !== 'colors') chips.push(`<span class="chip hot">${label}</span>`);
+  for (const [k, ic, label] of TOGGLES) if (S.modifiers[k] && k !== 'announcer' && k !== 'colors' && k !== 'takeover') chips.push(`<span class="chip hot">${label}</span>`);
   $('#hero-chips').innerHTML = chips.join('');
 
   const t = S.players.filter(p => p.team === 2), ct = S.players.filter(p => p.team === 3);
@@ -736,6 +838,217 @@ $('#qr-modal').onclick = e => { if (e.target.id === 'qr-modal') $('#qr-modal').c
 fetch('/api/info').then(r => r.json()).then(i => { INFO = i; renderShare(); if (!S || !S.online) $('#pw').textContent = i.password || 'none'; }).catch(() => {});
 icons();
 
+
+// ---------- armory ----------
+let CAT = null, AR = { sid: null, data: null, players: [] }, PK = null;
+const swatch = f => `<span class="swatch" style="background:linear-gradient(115deg, ${f.colors[0]}, ${f.colors[1]} 55%, ${f.colors[2]})"></span>`;
+const finishOf = w => CAT.finishes.find(f => f.key === (AR.data && AR.data.skins[w])) || CAT.finishes[0];
+const arGet = async () => { AR.data = AR.sid ? await (await fetch('/api/armory/' + encodeURIComponent(AR.sid))).json() : null; };
+
+async function arLoad() {
+  try {
+    if (!CAT) CAT = await (await fetch('/api/armory/catalog')).json();
+    AR.players = await (await fetch('/api/armory/players')).json();
+    if (!AR.sid && AR.players.length) AR.sid = AR.players[0].id;
+    await arGet();
+    arRender();
+  } catch (e) { $('#ar-body').innerHTML = '<div class="empty">Armory unavailable</div>'; }
+}
+
+function arRender() {
+  if (!CAT.installed) { $('#ar-body').innerHTML = '<div class="empty">Finishes are not generated yet. Run install.sh again, then restart the server.</div>'; return; }
+  $('#ar-who').innerHTML = AR.players.map(p =>
+    `<button class="${p.id === AR.sid ? 'on' : ''}" data-sid="${esc(p.id)}">${p.online ? '<span class="on-dot"></span>' : ''}${esc(p.name)}</button>`).join('')
+    || '<span class="empty">No players yet. Join the server once.</span>';
+  $('#ar-presets').innerHTML = AR.sid ? '<span>All weapons</span>' + CAT.finishes.map(f => `<button data-preset="${f.key}">${esc(f.name)}</button>`).join('') : '';
+  if (!AR.sid || !AR.data) { $('#ar-body').innerHTML = ''; return; }
+  $('#ar-body').innerHTML = '<div class="guns">' + CAT.weapons.map(w => { const f = finishOf(w.key);
+    return `<div class="gun" data-pick="${w.key}"><div class="gt">${esc(w.name)}</div>${swatch(f)}<div class="gs">${esc(f.name)}</div></div>`; }).join('') + '</div>';
+}
+
+function openPicker(key) {
+  PK = key;
+  $('#pk-title').textContent = CAT.weapons.find(w => w.key === key).name + ' finish';
+  const cur = finishOf(key).key;
+  $('#pk-grid').innerHTML = CAT.finishes.map(f => `<div class="opt ${f.key === cur ? 'cur' : ''}" data-opt="${f.key}">${swatch(f)}<div>${esc(f.name)}</div></div>`).join('');
+  $('#picker').classList.add('open');
+}
+
+async function equip(weapon, finish) {
+  $('#picker').classList.remove('open');
+  try {
+    const r = await fetch('/api/armory/' + encodeURIComponent(AR.sid), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ weapon, finish }) });
+    if (!r.ok) throw new Error((await r.json()).detail);
+    toast('Equipped ' + CAT.finishes.find(f => f.key === finish).name);
+    await arGet(); arRender();
+  } catch (e) { toast('Failed: ' + e.message, true); }
+}
+
+document.addEventListener('click', async e => {
+  const who = e.target.closest('[data-sid]');
+  if (who) { AR.sid = who.dataset.sid; AR.data = null; arRender(); await arGet(); arRender(); return; }
+  const pr = e.target.closest('[data-preset]');
+  if (pr) { if (confirm('Use this finish on every weapon of this player?')) equip('all', pr.dataset.preset); return; }
+  const pick = e.target.closest('[data-pick]');
+  if (pick) { openPicker(pick.dataset.pick); return; }
+  const opt = e.target.closest('[data-opt]');
+  if (opt && PK) equip(PK, opt.dataset.opt);
+});
+$('#pk-close').onclick = () => $('#picker').classList.remove('open');
+$('#picker').onclick = e => { if (e.target.id === 'picker') $('#picker').classList.remove('open'); };
+arLoad();
+setInterval(() => { if (!$('#picker').classList.contains('open')) fetch('/api/armory/players').then(r => r.json()).then(p => { const first = !AR.players.length; AR.players = p; if (first && p.length) arLoad(); else if (CAT) arRender(); }).catch(() => {}); }, 15000);
+
+
+// ---------- server room ----------
+let SRV = null, CON = { lines: [], after: '', filter: 'all', hist: [], hi: -1, startedAt: '' };
+const fmtSize = b => b > 1e9 ? (b / 1e9).toFixed(1) + ' GB' : b > 1e6 ? (b / 1e6).toFixed(0) + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' KB';
+const hhmm = ts => (ts || '').slice(11, 19);
+const ICON = (n) => `<i data-lucide="${n}"></i>`;
+
+async function srvCmd(action, msg) {
+  try {
+    const r = await fetch('/api/server', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }) });
+    if (!r.ok) throw new Error((await r.json()).detail || r.status);
+    if (msg) toast(msg);
+    setTimeout(loadServer, 800);
+  } catch (e) { toast('Failed: ' + e.message, true); }
+}
+
+function renderHealth() {
+  const el = $('#health'); if (!SRV) return;
+  const d = SRV.doctor || {}, st = SRV.cs16.state;
+  const busy = SRV.requestPending || d.status === 'repairing';
+  let cls = 'idle', icon = 'power', title = 'Stopped', sub = 'The server is not running';
+  if (busy) { cls = 'busy'; icon = 'loader'; title = 'Working…'; sub = d.status === 'repairing' ? 'Restarting or rebuilding the server' : 'Doctor is running'; }
+  else if (st === 'running' && S && S.online) {
+    const bad = d.healthy === false && d.status !== 'stopped' && new Date(d.ts + 'Z') > new Date(SRV.cs16.startedAt);
+    cls = bad ? 'bad' : 'ok'; icon = bad ? 'triangle-alert' : 'shield-check'; title = bad ? 'Problems' : 'Healthy';
+    sub = 'Up since ' + new Date(SRV.cs16.startedAt).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+  } else if (st === 'running') { cls = 'busy'; icon = 'loader'; title = 'Starting'; sub = 'Booting, give it a few seconds'; }
+  else if (st === 'exited' && ![0, 137, 143].includes(SRV.cs16.exitCode)) { cls = 'bad'; icon = 'skull'; title = 'Crashed'; sub = `Exited with code ${SRV.cs16.exitCode}`; }
+
+  const loaded = SRV.plugins.filter(p => p.loaded).length;
+  const rows = [
+    ['ReHLDS', SRV.rehlds || '?'],
+    ['Metamod-r', SRV.metamod || '?'],
+    ['AMX Mod X', SRV.amxx || '?'],
+    ['HLTV recorder', SRV.hltv ? SRV.hltv.state : '?'],
+    ['Plugins', SRV.plugins.length ? `${loaded} / ${SRV.plugins.length} loaded` : '–'],
+    ['Last check', d.ts ? `${ago(d.ts)} · ${esc(d.action || '')}` : 'never'],
+  ];
+  el.innerHTML = `
+    <div class="h-top"><div class="h-badge ${cls}">${ICON(icon)}</div><div class="h-title"><b>${title}</b><span>${esc(sub)}</span></div></div>
+    ${(d.problems || []).length && cls !== 'ok' ? `<div class="problems">${d.problems.map(p => `<div>• ${esc(p)}</div>`).join('')}</div>` : ''}
+    <dl class="kv">${rows.map(([k, v]) => `<dt>${k}</dt><dd title="${esc(v)}">${esc(v)}</dd>`).join('')}</dl>
+    ${SRV.plugins.length ? `<div class="plugins">${SRV.plugins.map(p => `<span class="plug ${p.loaded ? '' : 'off'}">${esc(p.name.replace(/ \[Core\]$/, ''))} <small>${esc(p.version)}</small></span>`).join('')}</div>` : ''}
+    <div class="h-actions">
+      ${st === 'running'
+        ? `<button class="btn" data-srv="restart">${ICON('rotate-cw')}Restart</button><button class="btn danger" data-srv="stop">${ICON('square')}Stop server</button>`
+        : `<button class="btn primary wide" data-srv="start">${ICON('play')}Start server</button>`}
+      <button class="btn" data-srv="check" ${busy ? 'disabled' : ''}>${ICON('stethoscope')}Health check</button>
+      <button class="btn" data-srv="repair" ${busy ? 'disabled' : ''} title="Restart the server; if that does not help, rebuild its image">${ICON('wrench')}Repair server</button>
+    </div>`;
+  icons();
+}
+
+async function loadServer() {
+  try { SRV = await (await fetch('/api/server')).json(); renderHealth(); } catch (e) { console.warn(e); }
+}
+
+function conLine(l) {
+  if (l.kind === 'chat') return `<div class="ln chat"><span class="t">${hhmm(l.ts)}</span>${l.scope === 'team' ? '<span class="scope">TEAM</span>' : ''}<span class="who t${l.team}">${esc(l.name)}</span>${esc(l.text)}</div>`;
+  return `<div class="ln ${l.kind}">${l.ts ? `<span class="t">${hhmm(l.ts)}</span>` : ''}${esc(l.text)}</div>`;
+}
+function renderConsole(stick) {
+  const body = $('#con-body');
+  const atBottom = stick || body.scrollHeight - body.scrollTop - body.clientHeight < 40;
+  const f = CON.filter;
+  const ls = CON.lines.filter(l => f === 'all' || l.kind === f || (f === 'error' && l.kind === 'warn') || (f === 'chat' && l.kind === 'cmd' && l.say));
+  body.innerHTML = ls.map(conLine).join('') || `<div class="empty">${f === 'chat' ? 'No chat yet. Players\' messages show up here.' : f === 'error' ? 'No errors or warnings this run.' : 'Nothing logged yet.'}</div>`;
+  if (atBottom) body.scrollTop = body.scrollHeight;
+}
+async function loadConsole() {
+  try {
+    const started = SRV && SRV.cs16 && SRV.cs16.startedAt || '';
+    if (started !== CON.startedAt) { CON.startedAt = started; CON.lines = []; CON.after = ''; }
+    const d = await (await fetch('/api/console?tail=' + (CON.after ? 400 : 1500) + (CON.after ? '&after=' + encodeURIComponent(CON.after) : ''))).json();
+    if (!d.lines.length) { if (!CON.lines.length) renderConsole(true); return; }
+    CON.lines.push(...d.lines);
+    if (CON.lines.length > 2500) CON.lines = CON.lines.slice(-2000);
+    CON.after = d.lines[d.lines.length - 1].ts;
+    renderConsole(false);
+  } catch (e) { console.warn(e); }
+}
+
+async function loadDemos() {
+  try {
+    const ds = await (await fetch('/api/demos')).json();
+    $('#demo-n').textContent = ds.length ? `${ds.length} saved · ${fmtSize(ds.reduce((a, d) => a + d.size, 0))}` : '';
+    $('#demo-list').innerHTML = ds.slice(0, 12).map(d => `
+      <div class="demo">
+        <div class="th" style="background-image:url('${img(d.map || '')}')"></div>
+        <div class="di"><b>${esc((d.map || d.name).replace(/^(ar|de|cs|fy|aim|awp)_/, '').replace(/_/g, ' '))}</b>
+          <span>${d.recording ? '<span class="rec">RECORDING</span> · ' : ''}${new Date(d.mtime * 1000).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} · ${fmtSize(d.size)}</span></div>
+        <div class="da">
+          <a class="btn icon-btn" href="/api/demos/${encodeURIComponent(d.name)}" download title="Download (put it in cstrike, then: viewdemo ${esc(d.name.replace(/\.dem$/, ''))})">${ICON('download')}</a>
+          ${d.recording ? '' : `<button class="btn icon-btn danger" data-demo-del="${esc(d.name)}" title="Delete">${ICON('trash-2')}</button>`}
+        </div>
+      </div>`).join('') || '<div class="empty">No demos yet. Every map is recorded automatically once someone plays.</div>';
+    icons();
+  } catch (e) { console.warn(e); }
+}
+
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-srv]');
+  if (b) {
+    const a = b.dataset.srv;
+    if (a === 'restart' && S && S.players && S.players.some(p => !p.bot) && !confirm('Restart the server? Everyone in game is disconnected for about 20 seconds.')) return;
+    if (a === 'stop' && !confirm('Stop the game server? Everyone in game is disconnected. The dashboard stays open.')) return;
+    if (a === 'repair' && !confirm('Repair the server? It restarts, and its image is rebuilt if that does not help.')) return;
+    b.disabled = true;
+    await srvCmd(a, { start: 'Starting the server…', stop: 'Stopping the server…', restart: 'Restarting the server…', check: 'Health check started', repair: 'Repair started, watch the console' }[a]);
+    return;
+  }
+  const t = e.target.closest('[data-con]');
+  if (t) { CON.filter = t.dataset.con; document.querySelectorAll('[data-con]').forEach(x => x.classList.toggle('on', x === t)); renderConsole(true); return; }
+  const del = e.target.closest('[data-demo-del]');
+  if (del && confirm('Delete this demo?')) {
+    const r = await fetch('/api/demos/' + encodeURIComponent(del.dataset.demoDel), { method: 'DELETE' });
+    r.ok ? (toast('Demo deleted'), loadDemos()) : toast('Delete failed', true);
+  }
+});
+
+$('#con-mode').onchange = () => { $('#con-input').placeholder = $('#con-mode').value === 'say' ? 'Message everyone in game…' : 'Server command, e.g. status, mp_roundtime 5, amxx plugins'; $('#con-input').focus(); };
+$('#con-form').onsubmit = async e => {
+  e.preventDefault();
+  const inp = $('#con-input'), v = inp.value.trim(); if (!v) return;
+  const say = $('#con-mode').value === 'say';
+  CON.hist.unshift(v); CON.hi = -1; inp.value = '';
+  try {
+    const r = say
+      ? await fetch('/api/rcon', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cmd: 'say [Host] ' + v.replace(/[;"]/g, '') }) })
+      : await fetch('/api/rcon', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cmd: v }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || r.status);
+    if (!say) {
+      CON.lines.push({ kind: 'cmd', text: '> ' + v });
+      (d.out || '').trim().split('\n').forEach(t => CON.lines.push({ kind: 'out', text: t }));
+    } else CON.lines.push({ kind: 'cmd', say: true, text: '[Host] ' + v });
+    renderConsole(true);
+  } catch (err) { toast('Failed: ' + err.message, true); }
+};
+$('#con-input').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+  e.preventDefault();
+  CON.hi = Math.max(-1, Math.min(CON.hist.length - 1, CON.hi + (e.key === 'ArrowUp' ? 1 : -1)));
+  e.target.value = CON.hi < 0 ? '' : CON.hist[CON.hi];
+});
+
+loadServer().then(loadConsole); loadDemos();
+setInterval(loadServer, 5000);
+setInterval(loadConsole, 2500);
+setInterval(loadDemos, 20000);
 
 loadState(); loadStats();
 setInterval(loadState, 2000);

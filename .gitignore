@@ -1,5 +1,7 @@
 .env
-data/
-dl/
+/data/
+/runtime/
+/dl/
+overlay/addons/amxmodx/data/sqlite3/
 overlay/addons/amxmodx/logs/*
 !overlay/addons/amxmodx/logs/.gitkeep

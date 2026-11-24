@@ -15,7 +15,9 @@ say() { printf '\n\033[1;33m==> %s\033[0m\n' "$*"; }
 
 say "Installing Docker and helpers"
 sudo apt-get update
-sudo apt-get install -y docker.io docker-compose-v2 curl jq xclip libnotify-bin unzip openssl
+sudo apt-get install -y curl jq xclip libnotify-bin unzip openssl python3
+# Keep an existing Docker (docker-ce conflicts with docker.io).
+docker compose version >/dev/null 2>&1 || sudo apt-get install -y docker.io docker-compose-v2
 sudo systemctl enable --now docker
 if ! id -nG "$USER" | grep -qw docker; then
   sudo usermod -aG docker "$USER"
@@ -23,37 +25,8 @@ if ! id -nG "$USER" | grep -qw docker; then
 fi
 DOCKER=(docker); docker info >/dev/null 2>&1 || DOCKER=(sudo docker)
 
-say "Passwords (.env)"
-if [[ ! -f .env ]]; then
-  printf 'RCON_PASSWORD=%s\nSV_PASSWORD=%s\n' "$(openssl rand -hex 8)" "$(openssl rand -hex 3)" > .env
-fi
-chmod 600 .env
-RCON=$(grep -oP '^RCON_PASSWORD=\K.*' .env)
+ADMINS="$ADMINS" tools/setup.sh
 SVPW=$(grep -oP '^SV_PASSWORD=\K.*' .env)
-sed -i "s/^rcon_password .*/rcon_password \"$RCON\"/; s/^sv_password .*/sv_password \"$SVPW\"/" cfg/server.cfg
-
-say "Admins"
-USERS=overlay/addons/amxmodx/configs/users.ini
-for sid in ${ADMINS//,/ }; do
-  [[ "$sid" =~ ^7656119[0-9]{10}$ ]] || { echo "Skipping invalid SteamID64: $sid"; continue; }
-  z=$((sid - 76561197960265728))
-  id="STEAM_0:$((z % 2)):$((z / 2))"
-  grep -q "\"$id\"" "$USERS" || echo "\"$id\" \"\" \"abcdefghijklmnopqrstu\" \"ce\"" >> "$USERS"
-  echo "Admin: $id"
-done
-
-say "Public IP for map downloads (FastDL)"
-if IP=$(curl -fsS --max-time 5 https://api.ipify.org); then
-  sed -i "s|^sv_downloadurl .*|sv_downloadurl \"http://$IP:27080/\"|" cfg/server.cfg
-  echo "sv_downloadurl -> http://$IP:27080/"
-else
-  echo "Could not detect the public IP; edit sv_downloadurl in cfg/server.cfg by hand."
-fi
-
-say "Building images (first run downloads HLDS, takes a few minutes)"
-mkdir -p data yapb-graph
-"${DOCKER[@]}" build -t cs16-hlds -f Dockerfile .
-"${DOCKER[@]}" compose build
 
 say "Firewall"
 if sudo ufw status | grep -q "Status: active"; then
@@ -65,41 +38,11 @@ else
   echo "ufw is not active, nothing to open."
 fi
 
-say "Desktop shortcuts"
-APPS="$HOME/.local/share/applications"
-mkdir -p "$APPS"
-cat > "$APPS/cs16-server.desktop" <<EOF
-[Desktop Entry]
-Type=Application
-Name=CS 1.6 Server
-Comment=Start the CS 1.6 server and join it
-Exec=$DIR/launch.sh
-Icon=steam_icon_10
-Terminal=false
-Categories=Game;
-Actions=stop;
-
-[Desktop Action stop]
-Name=Stop CS 1.6 server
-Exec=$DIR/launch.sh stop
-EOF
-cat > "$APPS/cs16-dashboard.desktop" <<EOF
-[Desktop Entry]
-Type=Application
-Name=CS 1.6 Dashboard
-Comment=Live scoreboard, stats and server controls
-Exec=sh -c 'cd "$DIR" && docker compose up -d panel && sleep 2 && xdg-open http://localhost:8016'
-Icon=utilities-system-monitor
-Terminal=false
-Categories=Game;
-EOF
-chmod +x launch.sh tools/*.py "$APPS"/cs16-*.desktop
 DESK=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")
 if [[ -d "$DESK" ]]; then
-  cp "$APPS/cs16-server.desktop" "$APPS/cs16-dashboard.desktop" "$DESK/"
-  chmod +x "$DESK"/cs16-*.desktop
+  cp "$HOME/.local/share/applications/cs16-server.desktop" "$DESK/"
+  chmod +x "$DESK/cs16-server.desktop"
   gio set "$DESK/cs16-server.desktop" metadata::trusted true 2>/dev/null || true
-  gio set "$DESK/cs16-dashboard.desktop" metadata::trusted true 2>/dev/null || true
 fi
 
 cat <<EOF

@@ -1,9 +1,10 @@
 /*
  * ServerTools for CS 1.6: port of the CS2 ServerTools plugin.
  *  - Mode + map chat vote near the end of each match (type the number), switches 5s after the end
- *  - Modes: ar (GunGame), dm (ReGameDLL deathmatch), casual, comp. Config: configs/servertools.ini
+ *  - Modes: ar (GunGame), dm (ReGameDLL deathmatch), casual, comp, retakes, rush. Config: configs/servertools.ini
  *  - Bots (YaPB) fill to N players, difficulty 0-3
  *  - Fun toggles: low gravity, headshot only, speed, adaptive bots, kill announcer, player colors
+ *  - Retakes/Rush (st_rounds.inl), bot takeover (st_takeover.inl), weapon finishes + human agents (st_skins.inl)
  *  - Stats in SQLite (data/sqlite3/servertools.sq3) for the web panel; st_state prints JSON for it
  * State that must survive map changes (mode, bots, toggles) lives in localinfo.
  */
@@ -15,10 +16,11 @@
 #include <hamsandwich>
 #include <sqlx>
 #include <json>
+#include <reapi>
 
 #pragma dynamic 32768
 
-#define MAX_MODES 6
+#define MAX_MODES 8
 #define MAX_MAPS 32
 #define TASK_VOTE 7100
 #define TASK_SWITCH 7200
@@ -43,12 +45,19 @@ new g_lastKiller, g_rounds, g_matchRecorded, g_ggWinner[32];
 new Handle:g_db;
 new pVoteSecs, pChoices, pEndScreen;
 
+new bool:g_roundLive = true;
+#include "st_rounds.inl"
+#include "st_takeover.inl"
+#include "st_skins.inl"
+
 new const DIFF_NAMES[][] = { "easy", "normal", "hard", "expert" };
 new const COLORS[6][3] = { {255,40,40}, {40,140,255}, {40,255,80}, {255,220,0}, {255,0,255}, {0,255,255} };
 
+public plugin_precache() { skins_precache(); }
+
 public plugin_init()
 {
-	register_plugin("ServerTools", "1.0.0", "local");
+	register_plugin("ServerTools", "1.1.0", "local");
 
 	pVoteSecs = register_cvar("st_vote_seconds", "20");
 	pChoices = register_cvar("st_map_choices", "5");
@@ -82,6 +91,9 @@ public plugin_init()
 
 	load_config();
 	load_state();
+	rounds_init();
+	takeover_init();
+	skins_init();
 
 	// GunGame reads gg_enabled ~1s after map start; set it now (this plugin loads before gungame.amxx).
 	set_cvar_num("gg_enabled", equal(g_modeKey[g_mode], "ar") ? 1 : 0);
@@ -98,6 +110,7 @@ public plugin_cfg()
 	db_exec("CREATE INDEX IF NOT EXISTS st_kills_k ON st_kills(killer_id)");
 	db_exec("CREATE INDEX IF NOT EXISTS st_kills_v ON st_kills(victim_id)");
 	db_exec("CREATE TABLE IF NOT EXISTS st_matches (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, map TEXT, mode TEXT, winner_id TEXT, winner_name TEXT, winner_bot INTEGER NOT NULL DEFAULT 0)");
+	db_exec("CREATE TABLE IF NOT EXISTS st_skins (player_id TEXT NOT NULL, weapon TEXT NOT NULL, finish TEXT NOT NULL, PRIMARY KEY (player_id, weapon))");
 
 	apply_mode_cfg();
 	set_task(1.5, "apply_mode_cfg");  // again after server.cfg / gungame.cfg have run
@@ -159,6 +172,7 @@ load_state()
 	get_localinfo("st_mods", v, charsmax(v));
 	new b = str_to_num(v);
 	g_lowgrav = bool:(b & 1); g_hs = bool:(b & 2); g_speed = bool:(b & 4);
+	if (v[0]) g_takeover = bool:(b & 64);
 	g_adaptive = bool:(b & 8); g_announcer = bool:(b & 16); g_colors = bool:(b & 32);
 }
 
@@ -168,7 +182,7 @@ save_state()
 	set_localinfo("st_mode", g_modeKey[g_mode]);
 	num_to_str(g_bots, v, charsmax(v)); set_localinfo("st_bots", v);
 	num_to_str(g_diff, v, charsmax(v)); set_localinfo("st_diff", v);
-	new b = (g_lowgrav ? 1 : 0) | (g_hs ? 2 : 0) | (g_speed ? 4 : 0) | (g_adaptive ? 8 : 0) | (g_announcer ? 16 : 0) | (g_colors ? 32 : 0);
+	new b = (g_lowgrav ? 1 : 0) | (g_hs ? 2 : 0) | (g_speed ? 4 : 0) | (g_adaptive ? 8 : 0) | (g_announcer ? 16 : 0) | (g_colors ? 32 : 0) | (g_takeover ? 64 : 0);
 	num_to_str(b, v, charsmax(v)); set_localinfo("st_mods", v);
 }
 
@@ -181,6 +195,7 @@ mode_by_key(const key[])
 
 public apply_mode_cfg()
 {
+	server_cmd("yb_debug_goal -1");
 	server_cmd("exec st/common.cfg");
 	server_cmd("exec st/%s.cfg", g_modeKey[g_mode]);
 	server_exec();
@@ -315,14 +330,16 @@ top_player()
 public client_putinserver(id)
 {
 	g_kills[id] = 0; g_deaths[id] = 0; g_streak[id] = 0; g_multi[id] = 0;
+	g_agent[id] = 0;
+	arrayset(g_skin[id], 0, SKIN_WEAPONS);
 	if (!is_user_hltv(id)) set_task(1.0, "delayed_upsert", id);
 }
 
-public delayed_upsert(id) { if (is_user_connected(id)) upsert_player(id); }
+public delayed_upsert(id) { if (is_user_connected(id)) { upsert_player(id); load_skins(id); } }
 
 public client_disconnected(id)
 {
-	g_votes[id] = 0;
+	g_votes[id] = 0; g_agent[id] = 0; g_usePrev[id] = false;
 	g_kills[id] = 0; g_deaths[id] = 0; g_streak[id] = 0; g_multi[id] = 0;
 }
 
@@ -330,7 +347,7 @@ public ev_death()
 {
 	new killer = read_data(1), victim = read_data(2), hs = read_data(3);
 	new wpn[24]; read_data(4, wpn, charsmax(wpn));
-	if (!is_user_connected(victim)) return;
+	if (!is_user_connected(victim) || g_silent[victim]) return;
 
 	g_deaths[victim]++;
 	new vstreak = g_streak[victim];
@@ -404,13 +421,15 @@ public record_gg_win()
 	if (g_phase != PH_DECIDED) pick_random_next();
 }
 
-public ev_round_end() { g_rounds++; }
+public ev_round_end() { g_rounds++; g_roundLive = false; }
 public ev_restart() { g_rounds = 0; }
 public ev_round_start()
 {
-	if (!equal(g_modeKey[g_mode], "comp")) return;
-	new max = get_cvar_num("mp_maxrounds");
-	if (max > 0 && g_rounds >= max - 1) auto_vote();
+	if (!mode_is("comp") && !site_mode()) return;
+	new maxr = get_cvar_num("mp_maxrounds"), win = get_cvar_num("mp_winlimit");
+	if (maxr > 0 && g_rounds >= maxr - 1) auto_vote();
+	// match point
+	else if (win > 1 && max(get_member_game(m_iNumCTWins), get_member_game(m_iNumTerroristWins)) >= win - 1) auto_vote();
 }
 
 public check_near_end()
@@ -585,6 +604,14 @@ public cmd_say(id)
 	trim(text);
 	new p = 0;
 	if (text[0] == '!' || text[0] == '/') p = 1;
+	if (text[0])
+	{
+		// Chat feed for the dashboard console (parsed from the container log). Team numbers as in st_state.
+		new argv0[12], who[32], tm = _:cs_get_user_team(id);
+		read_argv(0, argv0, charsmax(argv0));
+		get_user_name(id, who, charsmax(who));
+		server_print("[CHAT] %s %d %s: %s", equal(argv0, "say_team") ? "team" : "all", (tm == 1 || tm == 2) ? tm + 1 : 0, who, text);
+	}
 
 	// numeric vote
 	if ((g_phase == PH_MODEVOTE || g_phase == PH_MAPVOTE) && isdigit(text[p]))
@@ -628,14 +655,14 @@ public cmd_say(id)
 	}
 	else if (equali(cmd, "fun"))
 	{
-		client_print(id, print_chat, "Low grav %s | HS only %s | Speed %s | Adaptive %s | Announcer %s | Colors %s | Bots %s",
+		client_print(id, print_chat, "Low grav %s | HS only %s | Speed %s | Adaptive %s | Announcer %s | Colors %s | Takeover %s | Bots %s",
 			g_lowgrav ? "ON" : "off", g_hs ? "ON" : "off", g_speed ? "ON" : "off", g_adaptive ? "ON" : "off",
-			g_announcer ? "ON" : "off", g_colors ? "ON" : "off", DIFF_NAMES[g_diff]);
+			g_announcer ? "ON" : "off", g_colors ? "ON" : "off", g_takeover ? "ON" : "off", DIFF_NAMES[g_diff]);
 	}
 	else if (equali(cmd, "host") || equali(cmd, "help"))
 	{
-		client_print(id, print_chat, "Everyone: !vote !nextmap !maps !fun !lowgrav !headshot !speed !adaptive !announcer !colors");
-		client_print(id, print_chat, "Host: !bots <n> !diff <0-3> !map <name> !mode <ar|dm|casual|comp> [map] !restart");
+		client_print(id, print_chat, "Everyone: !vote !nextmap !maps !fun !lowgrav !headshot !speed !adaptive !announcer !colors !skins !knife !takeover");
+		client_print(id, print_chat, "Host: !bots <n> !diff <0-3> !map <name> !mode <ar|dm|casual|comp|retakes|rush> [map] !restart");
 	}
 	else if (equali(cmd, "lowgrav")) toggle(name, "lowgrav");
 	else if (equali(cmd, "headshot") || equali(cmd, "hs")) toggle(name, "headshot");
@@ -643,6 +670,13 @@ public cmd_say(id)
 	else if (equali(cmd, "adaptive")) toggle(name, "adaptive");
 	else if (equali(cmd, "announcer")) toggle(name, "announcer");
 	else if (equali(cmd, "colors")) toggle(name, "colors");
+	else if (equali(cmd, "skins") || equali(cmd, "ws")) skins_menu(id);
+	else if (equali(cmd, "knife")) finish_menu(id, 0);
+	else if (equali(cmd, "takeover") || equali(cmd, "tk"))
+	{
+		if (equali(arg1, "toggle")) { if (admin) toggle(name, "takeover"); else client_print(id, print_chat, "Host only."); }
+		else try_takeover(id, false);
+	}
 	else if (equali(cmd, "bots") || equali(cmd, "diff") || equali(cmd, "map") || equali(cmd, "mode") || equali(cmd, "restart"))
 	{
 		if (!admin) { client_print(id, print_chat, "Host only."); return PLUGIN_HANDLED; }
@@ -750,6 +784,7 @@ toggle(const who[], const what[])
 	else if (equal(what, "adaptive")) { g_adaptive = !g_adaptive; on = g_adaptive; copy(label, 31, "adaptive bots"); }
 	else if (equal(what, "announcer")) { g_announcer = !g_announcer; on = g_announcer; copy(label, 31, "kill announcer"); }
 	else if (equal(what, "colors")) { g_colors = !g_colors; on = g_colors; copy(label, 31, "player colors"); }
+	else if (equal(what, "takeover")) { g_takeover = !g_takeover; on = g_takeover; copy(label, 31, "bot takeover"); }
 	else return;
 	save_state();
 	apply_modifiers();
@@ -794,6 +829,7 @@ public fw_spawn(id)
 {
 	if (!is_user_alive(id)) return;
 	paint(id);
+	apply_agent(id);
 	if (equal(g_modeKey[g_mode], "dm")) cs_set_user_money(id, 16000, 0);
 }
 
@@ -892,6 +928,8 @@ public srv_state()
 	json_object_set_bool(mods, "adaptive", g_adaptive);
 	json_object_set_bool(mods, "announcer", g_announcer);
 	json_object_set_bool(mods, "colors", g_colors);
+	json_object_set_bool(mods, "takeover", g_takeover);
+	json_object_set_bool(root, "skins", g_skinsOn);
 	json_object_set_value(root, "modifiers", mods);
 	json_free(mods);
 
@@ -914,6 +952,8 @@ public srv_state()
 		get_user_name(id, name, charsmax(name));
 		get_user_ping(id, ping, loss);
 		json_object_set_string(p, "name", name);
+		new authid[35]; get_user_authid(id, authid, charsmax(authid));
+		if (!is_user_bot(id)) json_object_set_string(p, "id", authid);
 		json_object_set_bool(p, "bot", bool:is_user_bot(id));
 		// 1.6 teams: 1 = T, 2 = CT. The panel uses CS2 numbering (2 = T, 3 = CT).
 		new t = _:cs_get_user_team(id);
